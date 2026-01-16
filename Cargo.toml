@@ -1,0 +1,8 @@
+[package]
+name = "harbinger"
+version = "0.1.0"
+edition = "2024"
+description = "Provide the necessary prerequisites for the execution of the main program logic."
+
+[dependencies]
+thiserror = "2"
