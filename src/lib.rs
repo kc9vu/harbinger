@@ -31,11 +31,11 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("extern crate $1: $2")]
-    Extern(&'static str, String),
+    Extern(&'static str, Box<dyn std::error::Error>),
 }
 
 /// 读取环境变量, 并判断文件存在
-pub fn env(key: &'static str) -> Option<PathBuf> {
+pub fn env_file(key: &'static str) -> Option<PathBuf> {
     std::env::var_os(key)
         .as_deref()
         .map(Path::new)
@@ -43,8 +43,10 @@ pub fn env(key: &'static str) -> Option<PathBuf> {
         .map(Path::to_path_buf)
 }
 
-/// 从常见的配置目录中搜索
-pub fn find(name: &str) -> Option<PathBuf> {
+/// 从常见的目录中搜索配置
+/// <NAME> if contains . or /
+/// <NAME>/config.toml, <NAME>/config.json if not
+pub fn find_cfg(name: &str) -> Option<PathBuf> {
     for dir in DIRS.iter() {
         if name.contains('/') {
             let path = dir.join(name);
