@@ -4,7 +4,9 @@ use std::sync::LazyLock;
 #[cfg(target_os = "windows")]
 static DIRS: LazyLock<Vec<PathBuf>> = LazyLock::new(|| {
     let mut v = vec![];
-    if let Ok(exe) = std::env::current_exe() && let Some(pwd) = exe.parent() {
+    if let Ok(exe) = std::env::current_exe()
+        && let Some(pwd) = exe.parent()
+    {
         v.push(pwd.to_path_buf());
     }
     if let Some(home) = std::env::home_dir() {
@@ -16,7 +18,9 @@ static DIRS: LazyLock<Vec<PathBuf>> = LazyLock::new(|| {
 #[cfg(any(target_os = "macos", target_os = "linux"))]
 static DIRS: LazyLock<Vec<PathBuf>> = LazyLock::new(|| {
     let mut v = vec![];
-    if let Ok(exe) = std::env::current_exe() && let Some(pwd) = exe.parent() {
+    if let Ok(exe) = std::env::current_exe()
+        && let Some(pwd) = exe.parent()
+    {
         v.push(pwd.to_path_buf());
     }
     if let Some(home) = std::env::home_dir() {
@@ -44,16 +48,12 @@ pub fn env_file(key: &'static str) -> Option<PathBuf> {
 }
 
 /// 从常见的目录中搜索配置
-/// <NAME> if contains . or /
-/// <NAME>/config.toml, <NAME>/config.json if not
-pub fn find_cfg(name: &str) -> Option<PathBuf> {
+/// 如果包含‘.’或‘/’，直接搜索 <NAME>
+/// 如果不包含，则搜索 <NAME>/config.toml, <NAME>/config.json
+pub fn find_cfg(name: impl AsRef<str>) -> Option<PathBuf> {
+    let name = name.as_ref();
     for dir in DIRS.iter() {
-        if name.contains('/') {
-            let path = dir.join(name);
-            if path.exists() {
-                return Some(path);
-            }
-        } else if name.contains('.') {
+        if name.contains('/') || name.contains('.') {
             let path = dir.join(name);
             if path.exists() {
                 return Some(path);
